@@ -1,7 +1,0 @@
-add_test([=[NetworkTest.Creation]=]  C:/Users/Domin/projectRoot/Codes/c_cpp/CNN_demo/build/bin/test_network.exe [==[--gtest_filter=NetworkTest.Creation]==] --gtest_also_run_disabled_tests)
-set_tests_properties([=[NetworkTest.Creation]=]  PROPERTIES WORKING_DIRECTORY C:/Users/Domin/projectRoot/Codes/c_cpp/CNN_demo/build/tests SKIP_REGULAR_EXPRESSION [==[\[  SKIPPED \]]==])
-add_test([=[NetworkTest.ConvNet]=]  C:/Users/Domin/projectRoot/Codes/c_cpp/CNN_demo/build/bin/test_network.exe [==[--gtest_filter=NetworkTest.ConvNet]==] --gtest_also_run_disabled_tests)
-set_tests_properties([=[NetworkTest.ConvNet]=]  PROPERTIES WORKING_DIRECTORY C:/Users/Domin/projectRoot/Codes/c_cpp/CNN_demo/build/tests SKIP_REGULAR_EXPRESSION [==[\[  SKIPPED \]]==])
-add_test([=[NetworkTest.TrainingMode]=]  C:/Users/Domin/projectRoot/Codes/c_cpp/CNN_demo/build/bin/test_network.exe [==[--gtest_filter=NetworkTest.TrainingMode]==] --gtest_also_run_disabled_tests)
-set_tests_properties([=[NetworkTest.TrainingMode]=]  PROPERTIES WORKING_DIRECTORY C:/Users/Domin/projectRoot/Codes/c_cpp/CNN_demo/build/tests SKIP_REGULAR_EXPRESSION [==[\[  SKIPPED \]]==])
-set(  test_network_TESTS NetworkTest.Creation NetworkTest.ConvNet NetworkTest.TrainingMode)

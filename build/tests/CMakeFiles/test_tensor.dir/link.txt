@@ -1,3 +1,0 @@
-"C:\Program Files\CMake\bin\cmake.exe" -E rm -f CMakeFiles\test_tensor.dir/objects.a
-C:\Users\Domin\scoop\apps\mingw\current\bin\ar.exe qc CMakeFiles\test_tensor.dir/objects.a @CMakeFiles\test_tensor.dir\objects1.rsp
-C:\Users\Domin\scoop\apps\mingw\current\bin\c++.exe  -fopenmp -O3 -DNDEBUG -Wl,--whole-archive CMakeFiles\test_tensor.dir/objects.a -Wl,--no-whole-archive -o ..\bin\test_tensor.exe -Wl,--out-implib,..\lib\libtest_tensor.dll.a -Wl,--major-image-version,0,--minor-image-version,0 @CMakeFiles\test_tensor.dir\linkLibs.rsp

@@ -1,3 +1,0 @@
-"C:\Program Files\CMake\bin\cmake.exe" -E rm -f CMakeFiles\test_layers.dir/objects.a
-C:\Users\Domin\scoop\apps\mingw\current\bin\ar.exe qc CMakeFiles\test_layers.dir/objects.a @CMakeFiles\test_layers.dir\objects1.rsp
-C:\Users\Domin\scoop\apps\mingw\current\bin\c++.exe  -fopenmp -O3 -DNDEBUG -Wl,--whole-archive CMakeFiles\test_layers.dir/objects.a -Wl,--no-whole-archive -o ..\bin\test_layers.exe -Wl,--out-implib,..\lib\libtest_layers.dll.a -Wl,--major-image-version,0,--minor-image-version,0 @CMakeFiles\test_layers.dir\linkLibs.rsp

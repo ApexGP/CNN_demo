@@ -1,1 +1,0 @@
--IC:/Users/Domin/projectRoot/Codes/c_cpp/CNN_demo/include -isystem "C:/Users/Domin/miniconda3/envs/cnn_venv/Lib/site-packages/pybind11/include" -isystem C:/Users/Domin/miniconda3/envs/cnn_venv/include -isystem "C:/vcpkg/installed/x64-mingw-static/include/openblas"
