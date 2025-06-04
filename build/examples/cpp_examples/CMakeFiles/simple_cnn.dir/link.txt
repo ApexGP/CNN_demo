@@ -1,0 +1,3 @@
+"C:\Program Files\CMake\bin\cmake.exe" -E rm -f CMakeFiles\simple_cnn.dir/objects.a
+C:\Users\Domin\scoop\apps\mingw\current\bin\ar.exe qc CMakeFiles\simple_cnn.dir/objects.a @CMakeFiles\simple_cnn.dir\objects1.rsp
+C:\Users\Domin\scoop\apps\mingw\current\bin\c++.exe  -fopenmp -O3 -DNDEBUG -Wl,--whole-archive CMakeFiles\simple_cnn.dir/objects.a -Wl,--no-whole-archive -o ..\..\bin\simple_cnn.exe -Wl,--out-implib,..\..\lib\libsimple_cnn.dll.a -Wl,--major-image-version,0,--minor-image-version,0 @CMakeFiles\simple_cnn.dir\linkLibs.rsp

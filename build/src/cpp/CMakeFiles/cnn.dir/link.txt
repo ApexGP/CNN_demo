@@ -1,0 +1,2 @@
+C:\Users\Domin\scoop\apps\mingw\current\bin\ar.exe qc ..\..\lib\libcnn.a CMakeFiles/cnn.dir/tensor.cpp.obj CMakeFiles/cnn.dir/network.cpp.obj CMakeFiles/cnn.dir/layers.cpp.obj CMakeFiles/cnn.dir/optimizer.cpp.obj CMakeFiles/cnn.dir/loss.cpp.obj CMakeFiles/cnn.dir/utils.cpp.obj
+C:\Users\Domin\scoop\apps\mingw\current\bin\ranlib.exe ..\..\lib\libcnn.a

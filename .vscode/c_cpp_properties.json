@@ -1,0 +1,23 @@
+{
+    "configurations": [
+      {
+        "name": "Win32",
+        "includePath": [
+          "${workspaceFolder}/**",
+          "${workspaceFolder}/include/**",
+          "${workspaceFolder}/src/**",
+          "C:/vcpkg/installed/x64-mingw-static/include/**",
+          "D:/RTlibs/vcpkg/installed/x64-mingw-static/include/**"
+        ],
+        "defines": ["_DEBUG", "UNICODE", "_UNICODE", "ASIO_STANDALONE"],
+        "windowsSdkVersion": "10.0.19041.0",
+        "compilerPath": "C:/Users/Domin/scoop/apps/mingw/current/bin/g++.exe",
+        "cStandard": "c17",
+        "cppStandard": "c++17",
+        "intelliSenseMode": "windows-gcc-x64",
+        "configurationProvider": "ms-vscode.cmake-tools",
+        "compileCommands": "${workspaceFolder}/build/compile_commands.json"
+      }
+    ],
+    "version": 4
+  }

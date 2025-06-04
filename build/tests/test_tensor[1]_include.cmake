@@ -1,0 +1,5 @@
+if(EXISTS "C:/Users/Domin/projectRoot/Codes/c_cpp/CNN_demo/build/tests/test_tensor[1]_tests.cmake")
+  include("C:/Users/Domin/projectRoot/Codes/c_cpp/CNN_demo/build/tests/test_tensor[1]_tests.cmake")
+else()
+  add_test(test_tensor_NOT_BUILT test_tensor_NOT_BUILT)
+endif()

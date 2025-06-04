@@ -1,0 +1,2 @@
+C:\Users\Domin\scoop\apps\mingw\current\bin\ar.exe qc ..\..\lib\libcnn_core.a CMakeFiles/cnn_core.dir/tensor_core.c.obj CMakeFiles/cnn_core.dir/math_core.c.obj CMakeFiles/cnn_core.dir/conv_core.c.obj
+C:\Users\Domin\scoop\apps\mingw\current\bin\ranlib.exe ..\..\lib\libcnn_core.a

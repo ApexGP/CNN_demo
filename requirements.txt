@@ -1,0 +1,44 @@
+# CNN混合架构框架 Python依赖
+# 
+# 安装方式:
+#   pip install -r requirements.txt
+#   或
+#   conda install --file requirements.txt -c conda-forge
+
+# 核心依赖
+pybind11>=2.6.0        # Python-C++绑定
+numpy>=1.19.0          # 数值计算
+matplotlib>=3.3.0      # 可视化
+
+# 可选依赖 (增强功能)
+tqdm>=4.50.0          # 进度条显示
+pillow>=8.0.0         # 图像处理
+scipy>=1.6.0          # 科学计算
+
+# 开发和测试依赖 (仅开发者需要)
+# pytest>=6.0.0        # 单元测试
+# flake8>=3.8.0         # 代码风格检查
+
+# 可视化相关
+seaborn>=0.11.2
+tensorboard>=2.8.0
+plotly>=5.6.0
+
+# 图像处理和数据集
+opencv-python>=4.5.5
+scikit-learn>=1.0.2
+scikit-image>=0.19.1
+
+# 深度学习库（用于比较和参考）
+torch>=1.10.0
+torchvision>=0.11.0
+
+# 文档工具
+sphinx>=4.4.0
+sphinx_rtd_theme>=1.0.0
+
+# 数据处理
+pandas>=1.4.0
+
+# 模型保存
+h5py>=3.6.0 

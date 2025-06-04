@@ -1,0 +1,3 @@
+"C:\Program Files\CMake\bin\cmake.exe" -E rm -f CMakeFiles\mnist_training.dir/objects.a
+C:\Users\Domin\scoop\apps\mingw\current\bin\ar.exe qc CMakeFiles\mnist_training.dir/objects.a @CMakeFiles\mnist_training.dir\objects1.rsp
+C:\Users\Domin\scoop\apps\mingw\current\bin\c++.exe  -fopenmp -O3 -DNDEBUG -Wl,--whole-archive CMakeFiles\mnist_training.dir/objects.a -Wl,--no-whole-archive -o ..\..\bin\mnist_training.exe -Wl,--out-implib,..\..\lib\libmnist_training.dll.a -Wl,--major-image-version,0,--minor-image-version,0 @CMakeFiles\mnist_training.dir\linkLibs.rsp

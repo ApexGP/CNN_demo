@@ -1,0 +1,110 @@
+[
+{
+  "directory": "C:/Users/Domin/projectRoot/Codes/c_cpp/CNN_demo/build/src/core_c",
+  "command": "C:\\Users\\Domin\\scoop\\apps\\mingw\\current\\bin\\cc.exe -DCNN_CORE_BUILDING -DUSE_OPENBLAS @CMakeFiles/cnn_core.dir/includes_C.rsp  -fopenmp -O3 -DNDEBUG -std=gnu99 -fopenmp -o CMakeFiles\\cnn_core.dir\\tensor_core.c.obj -c C:\\Users\\Domin\\projectRoot\\Codes\\c_cpp\\CNN_demo\\src\\core_c\\tensor_core.c",
+  "file": "C:/Users/Domin/projectRoot/Codes/c_cpp/CNN_demo/src/core_c/tensor_core.c",
+  "output": "src/core_c/CMakeFiles/cnn_core.dir/tensor_core.c.obj"
+},
+{
+  "directory": "C:/Users/Domin/projectRoot/Codes/c_cpp/CNN_demo/build/src/core_c",
+  "command": "C:\\Users\\Domin\\scoop\\apps\\mingw\\current\\bin\\cc.exe -DCNN_CORE_BUILDING -DUSE_OPENBLAS @CMakeFiles/cnn_core.dir/includes_C.rsp  -fopenmp -O3 -DNDEBUG -std=gnu99 -fopenmp -o CMakeFiles\\cnn_core.dir\\math_core.c.obj -c C:\\Users\\Domin\\projectRoot\\Codes\\c_cpp\\CNN_demo\\src\\core_c\\math_core.c",
+  "file": "C:/Users/Domin/projectRoot/Codes/c_cpp/CNN_demo/src/core_c/math_core.c",
+  "output": "src/core_c/CMakeFiles/cnn_core.dir/math_core.c.obj"
+},
+{
+  "directory": "C:/Users/Domin/projectRoot/Codes/c_cpp/CNN_demo/build/src/core_c",
+  "command": "C:\\Users\\Domin\\scoop\\apps\\mingw\\current\\bin\\cc.exe -DCNN_CORE_BUILDING -DUSE_OPENBLAS @CMakeFiles/cnn_core.dir/includes_C.rsp  -fopenmp -O3 -DNDEBUG -std=gnu99 -fopenmp -o CMakeFiles\\cnn_core.dir\\conv_core.c.obj -c C:\\Users\\Domin\\projectRoot\\Codes\\c_cpp\\CNN_demo\\src\\core_c\\conv_core.c",
+  "file": "C:/Users/Domin/projectRoot/Codes/c_cpp/CNN_demo/src/core_c/conv_core.c",
+  "output": "src/core_c/CMakeFiles/cnn_core.dir/conv_core.c.obj"
+},
+{
+  "directory": "C:/Users/Domin/projectRoot/Codes/c_cpp/CNN_demo/build/src/cpp",
+  "command": "C:\\Users\\Domin\\scoop\\apps\\mingw\\current\\bin\\c++.exe -DCNN_BUILDING -DUSE_OPENBLAS @CMakeFiles/cnn.dir/includes_CXX.rsp  -fopenmp -O3 -DNDEBUG -std=c++17 -fopenmp -o CMakeFiles\\cnn.dir\\tensor.cpp.obj -c C:\\Users\\Domin\\projectRoot\\Codes\\c_cpp\\CNN_demo\\src\\cpp\\tensor.cpp",
+  "file": "C:/Users/Domin/projectRoot/Codes/c_cpp/CNN_demo/src/cpp/tensor.cpp",
+  "output": "src/cpp/CMakeFiles/cnn.dir/tensor.cpp.obj"
+},
+{
+  "directory": "C:/Users/Domin/projectRoot/Codes/c_cpp/CNN_demo/build/src/cpp",
+  "command": "C:\\Users\\Domin\\scoop\\apps\\mingw\\current\\bin\\c++.exe -DCNN_BUILDING -DUSE_OPENBLAS @CMakeFiles/cnn.dir/includes_CXX.rsp  -fopenmp -O3 -DNDEBUG -std=c++17 -fopenmp -o CMakeFiles\\cnn.dir\\network.cpp.obj -c C:\\Users\\Domin\\projectRoot\\Codes\\c_cpp\\CNN_demo\\src\\cpp\\network.cpp",
+  "file": "C:/Users/Domin/projectRoot/Codes/c_cpp/CNN_demo/src/cpp/network.cpp",
+  "output": "src/cpp/CMakeFiles/cnn.dir/network.cpp.obj"
+},
+{
+  "directory": "C:/Users/Domin/projectRoot/Codes/c_cpp/CNN_demo/build/src/cpp",
+  "command": "C:\\Users\\Domin\\scoop\\apps\\mingw\\current\\bin\\c++.exe -DCNN_BUILDING -DUSE_OPENBLAS @CMakeFiles/cnn.dir/includes_CXX.rsp  -fopenmp -O3 -DNDEBUG -std=c++17 -fopenmp -o CMakeFiles\\cnn.dir\\layers.cpp.obj -c C:\\Users\\Domin\\projectRoot\\Codes\\c_cpp\\CNN_demo\\src\\cpp\\layers.cpp",
+  "file": "C:/Users/Domin/projectRoot/Codes/c_cpp/CNN_demo/src/cpp/layers.cpp",
+  "output": "src/cpp/CMakeFiles/cnn.dir/layers.cpp.obj"
+},
+{
+  "directory": "C:/Users/Domin/projectRoot/Codes/c_cpp/CNN_demo/build/src/cpp",
+  "command": "C:\\Users\\Domin\\scoop\\apps\\mingw\\current\\bin\\c++.exe -DCNN_BUILDING -DUSE_OPENBLAS @CMakeFiles/cnn.dir/includes_CXX.rsp  -fopenmp -O3 -DNDEBUG -std=c++17 -fopenmp -o CMakeFiles\\cnn.dir\\optimizer.cpp.obj -c C:\\Users\\Domin\\projectRoot\\Codes\\c_cpp\\CNN_demo\\src\\cpp\\optimizer.cpp",
+  "file": "C:/Users/Domin/projectRoot/Codes/c_cpp/CNN_demo/src/cpp/optimizer.cpp",
+  "output": "src/cpp/CMakeFiles/cnn.dir/optimizer.cpp.obj"
+},
+{
+  "directory": "C:/Users/Domin/projectRoot/Codes/c_cpp/CNN_demo/build/src/cpp",
+  "command": "C:\\Users\\Domin\\scoop\\apps\\mingw\\current\\bin\\c++.exe -DCNN_BUILDING -DUSE_OPENBLAS @CMakeFiles/cnn.dir/includes_CXX.rsp  -fopenmp -O3 -DNDEBUG -std=c++17 -fopenmp -o CMakeFiles\\cnn.dir\\loss.cpp.obj -c C:\\Users\\Domin\\projectRoot\\Codes\\c_cpp\\CNN_demo\\src\\cpp\\loss.cpp",
+  "file": "C:/Users/Domin/projectRoot/Codes/c_cpp/CNN_demo/src/cpp/loss.cpp",
+  "output": "src/cpp/CMakeFiles/cnn.dir/loss.cpp.obj"
+},
+{
+  "directory": "C:/Users/Domin/projectRoot/Codes/c_cpp/CNN_demo/build/src/cpp",
+  "command": "C:\\Users\\Domin\\scoop\\apps\\mingw\\current\\bin\\c++.exe -DCNN_BUILDING -DUSE_OPENBLAS @CMakeFiles/cnn.dir/includes_CXX.rsp  -fopenmp -O3 -DNDEBUG -std=c++17 -fopenmp -o CMakeFiles\\cnn.dir\\utils.cpp.obj -c C:\\Users\\Domin\\projectRoot\\Codes\\c_cpp\\CNN_demo\\src\\cpp\\utils.cpp",
+  "file": "C:/Users/Domin/projectRoot/Codes/c_cpp/CNN_demo/src/cpp/utils.cpp",
+  "output": "src/cpp/CMakeFiles/cnn.dir/utils.cpp.obj"
+},
+{
+  "directory": "C:/Users/Domin/projectRoot/Codes/c_cpp/CNN_demo/build/src/python",
+  "command": "C:\\Users\\Domin\\scoop\\apps\\mingw\\current\\bin\\c++.exe -DCNN_PYTHON_BUILDING -DUSE_OPENBLAS -Dcnn_framework_EXPORTS @CMakeFiles/cnn_framework.dir/includes_CXX.rsp  -fopenmp -O3 -DNDEBUG -std=c++17 -fvisibility=hidden -fopenmp -o CMakeFiles\\cnn_framework.dir\\cnn_module.cpp.obj -c C:\\Users\\Domin\\projectRoot\\Codes\\c_cpp\\CNN_demo\\src\\python\\cnn_module.cpp",
+  "file": "C:/Users/Domin/projectRoot/Codes/c_cpp/CNN_demo/src/python/cnn_module.cpp",
+  "output": "src/python/CMakeFiles/cnn_framework.dir/cnn_module.cpp.obj"
+},
+{
+  "directory": "C:/Users/Domin/projectRoot/Codes/c_cpp/CNN_demo/build/src/python",
+  "command": "C:\\Users\\Domin\\scoop\\apps\\mingw\\current\\bin\\c++.exe -DCNN_PYTHON_BUILDING -DUSE_OPENBLAS -Dcnn_framework_EXPORTS @CMakeFiles/cnn_framework.dir/includes_CXX.rsp  -fopenmp -O3 -DNDEBUG -std=c++17 -fvisibility=hidden -fopenmp -o CMakeFiles\\cnn_framework.dir\\tensor_binding.cpp.obj -c C:\\Users\\Domin\\projectRoot\\Codes\\c_cpp\\CNN_demo\\src\\python\\tensor_binding.cpp",
+  "file": "C:/Users/Domin/projectRoot/Codes/c_cpp/CNN_demo/src/python/tensor_binding.cpp",
+  "output": "src/python/CMakeFiles/cnn_framework.dir/tensor_binding.cpp.obj"
+},
+{
+  "directory": "C:/Users/Domin/projectRoot/Codes/c_cpp/CNN_demo/build/src/python",
+  "command": "C:\\Users\\Domin\\scoop\\apps\\mingw\\current\\bin\\c++.exe -DCNN_PYTHON_BUILDING -DUSE_OPENBLAS -Dcnn_framework_EXPORTS @CMakeFiles/cnn_framework.dir/includes_CXX.rsp  -fopenmp -O3 -DNDEBUG -std=c++17 -fvisibility=hidden -fopenmp -o CMakeFiles\\cnn_framework.dir\\network_binding.cpp.obj -c C:\\Users\\Domin\\projectRoot\\Codes\\c_cpp\\CNN_demo\\src\\python\\network_binding.cpp",
+  "file": "C:/Users/Domin/projectRoot/Codes/c_cpp/CNN_demo/src/python/network_binding.cpp",
+  "output": "src/python/CMakeFiles/cnn_framework.dir/network_binding.cpp.obj"
+},
+{
+  "directory": "C:/Users/Domin/projectRoot/Codes/c_cpp/CNN_demo/build/src/python",
+  "command": "C:\\Users\\Domin\\scoop\\apps\\mingw\\current\\bin\\c++.exe -DCNN_PYTHON_BUILDING -DUSE_OPENBLAS -Dcnn_framework_EXPORTS @CMakeFiles/cnn_framework.dir/includes_CXX.rsp  -fopenmp -O3 -DNDEBUG -std=c++17 -fvisibility=hidden -fopenmp -o CMakeFiles\\cnn_framework.dir\\layers_binding.cpp.obj -c C:\\Users\\Domin\\projectRoot\\Codes\\c_cpp\\CNN_demo\\src\\python\\layers_binding.cpp",
+  "file": "C:/Users/Domin/projectRoot/Codes/c_cpp/CNN_demo/src/python/layers_binding.cpp",
+  "output": "src/python/CMakeFiles/cnn_framework.dir/layers_binding.cpp.obj"
+},
+{
+  "directory": "C:/Users/Domin/projectRoot/Codes/c_cpp/CNN_demo/build/examples/cpp_examples",
+  "command": "C:\\Users\\Domin\\scoop\\apps\\mingw\\current\\bin\\c++.exe -DUSE_OPENBLAS @CMakeFiles/mnist_training.dir/includes_CXX.rsp  -fopenmp -O3 -DNDEBUG -std=c++17 -fopenmp -o CMakeFiles\\mnist_training.dir\\mnist_training.cpp.obj -c C:\\Users\\Domin\\projectRoot\\Codes\\c_cpp\\CNN_demo\\examples\\cpp_examples\\mnist_training.cpp",
+  "file": "C:/Users/Domin/projectRoot/Codes/c_cpp/CNN_demo/examples/cpp_examples/mnist_training.cpp",
+  "output": "examples/cpp_examples/CMakeFiles/mnist_training.dir/mnist_training.cpp.obj"
+},
+{
+  "directory": "C:/Users/Domin/projectRoot/Codes/c_cpp/CNN_demo/build/examples/cpp_examples",
+  "command": "C:\\Users\\Domin\\scoop\\apps\\mingw\\current\\bin\\c++.exe -DUSE_OPENBLAS @CMakeFiles/simple_cnn.dir/includes_CXX.rsp  -fopenmp -O3 -DNDEBUG -std=c++17 -fopenmp -o CMakeFiles\\simple_cnn.dir\\simple_cnn.cpp.obj -c C:\\Users\\Domin\\projectRoot\\Codes\\c_cpp\\CNN_demo\\examples\\cpp_examples\\simple_cnn.cpp",
+  "file": "C:/Users/Domin/projectRoot/Codes/c_cpp/CNN_demo/examples/cpp_examples/simple_cnn.cpp",
+  "output": "examples/cpp_examples/CMakeFiles/simple_cnn.dir/simple_cnn.cpp.obj"
+},
+{
+  "directory": "C:/Users/Domin/projectRoot/Codes/c_cpp/CNN_demo/build/tests",
+  "command": "C:\\Users\\Domin\\scoop\\apps\\mingw\\current\\bin\\c++.exe -DUSE_OPENBLAS @CMakeFiles/test_tensor.dir/includes_CXX.rsp  -fopenmp -O3 -DNDEBUG -std=c++17 -fopenmp -o CMakeFiles\\test_tensor.dir\\test_tensor.cpp.obj -c C:\\Users\\Domin\\projectRoot\\Codes\\c_cpp\\CNN_demo\\tests\\test_tensor.cpp",
+  "file": "C:/Users/Domin/projectRoot/Codes/c_cpp/CNN_demo/tests/test_tensor.cpp",
+  "output": "tests/CMakeFiles/test_tensor.dir/test_tensor.cpp.obj"
+},
+{
+  "directory": "C:/Users/Domin/projectRoot/Codes/c_cpp/CNN_demo/build/tests",
+  "command": "C:\\Users\\Domin\\scoop\\apps\\mingw\\current\\bin\\c++.exe -DUSE_OPENBLAS @CMakeFiles/test_network.dir/includes_CXX.rsp  -fopenmp -O3 -DNDEBUG -std=c++17 -fopenmp -o CMakeFiles\\test_network.dir\\test_network.cpp.obj -c C:\\Users\\Domin\\projectRoot\\Codes\\c_cpp\\CNN_demo\\tests\\test_network.cpp",
+  "file": "C:/Users/Domin/projectRoot/Codes/c_cpp/CNN_demo/tests/test_network.cpp",
+  "output": "tests/CMakeFiles/test_network.dir/test_network.cpp.obj"
+},
+{
+  "directory": "C:/Users/Domin/projectRoot/Codes/c_cpp/CNN_demo/build/tests",
+  "command": "C:\\Users\\Domin\\scoop\\apps\\mingw\\current\\bin\\c++.exe -DUSE_OPENBLAS @CMakeFiles/test_layers.dir/includes_CXX.rsp  -fopenmp -O3 -DNDEBUG -std=c++17 -fopenmp -o CMakeFiles\\test_layers.dir\\test_layers.cpp.obj -c C:\\Users\\Domin\\projectRoot\\Codes\\c_cpp\\CNN_demo\\tests\\test_layers.cpp",
+  "file": "C:/Users/Domin/projectRoot/Codes/c_cpp/CNN_demo/tests/test_layers.cpp",
+  "output": "tests/CMakeFiles/test_layers.dir/test_layers.cpp.obj"
+}
+]
