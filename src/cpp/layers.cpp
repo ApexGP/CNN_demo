@@ -1,4 +1,8 @@
 #include "cnn/layers.h"
+#include <algorithm>
+#include <cmath>
+#include <limits>
+#include <random>
 #include <stdexcept>
 
 namespace CNN {
@@ -21,23 +25,153 @@ void ConvLayer::initialize_parameters() {
   if (in_channels_ > 0) {
     weights_ = Tensor({(size_t)out_channels_, (size_t)in_channels_,
                        (size_t)kernel_size_, (size_t)kernel_size_});
+    // Xavier初始化
+    float fan_in = in_channels_ * kernel_size_ * kernel_size_;
+    float fan_out = out_channels_ * kernel_size_ * kernel_size_;
+    weights_.xavier_uniform(fan_in, fan_out);
+
     if (use_bias_) {
       bias_ = Tensor({(size_t)out_channels_});
+      bias_.zeros();
     }
     weight_grad_ = Tensor(weights_.shape());
+    weight_grad_.zeros();
     if (use_bias_) {
       bias_grad_ = Tensor(bias_.shape());
+      bias_grad_.zeros();
     }
   }
 }
 
 Tensor ConvLayer::forward(const Tensor &input) {
   last_input_ = input;
-  return input.clone(); // 简化实现
+
+  // 如果还没有初始化参数，根据输入形状初始化
+  if (in_channels_ == 0 && input.ndim() >= 3) {
+    in_channels_ = input.shape()[input.ndim() - 3];
+    initialize_parameters();
+  }
+
+  // 简化的卷积实现（假设输入是CHW格式）
+  if (input.ndim() != 3) {
+    throw std::runtime_error("ConvLayer期望3D输入 (C, H, W)");
+  }
+
+  size_t in_c = input.shape()[0];
+  size_t in_h = input.shape()[1];
+  size_t in_w = input.shape()[2];
+
+  size_t out_h = (in_h + 2 * padding_ - kernel_size_) / stride_ + 1;
+  size_t out_w = (in_w + 2 * padding_ - kernel_size_) / stride_ + 1;
+
+  Tensor output({(size_t)out_channels_, out_h, out_w});
+  output.zeros();
+
+  // 简化的卷积计算（无优化版本）
+  for (int oc = 0; oc < out_channels_; oc++) {
+    for (size_t oh = 0; oh < out_h; oh++) {
+      for (size_t ow = 0; ow < out_w; ow++) {
+        float sum = 0.0f;
+
+        for (int ic = 0; ic < in_channels_; ic++) {
+          for (int kh = 0; kh < kernel_size_; kh++) {
+            for (int kw = 0; kw < kernel_size_; kw++) {
+              int ih = oh * stride_ - padding_ + kh;
+              int iw = ow * stride_ - padding_ + kw;
+
+              if (ih >= 0 && ih < (int)in_h && iw >= 0 && iw < (int)in_w) {
+                size_t input_idx = ic * in_h * in_w + ih * in_w + iw;
+                size_t weight_idx =
+                    oc * in_channels_ * kernel_size_ * kernel_size_ +
+                    ic * kernel_size_ * kernel_size_ + kh * kernel_size_ + kw;
+                sum += input[input_idx] * weights_[weight_idx];
+              }
+            }
+          }
+        }
+
+        if (use_bias_) {
+          sum += bias_[oc];
+        }
+
+        size_t output_idx = oc * out_h * out_w + oh * out_w + ow;
+        output.data()[output_idx] = sum;
+      }
+    }
+  }
+
+  return output;
 }
 
 Tensor ConvLayer::backward(const Tensor &grad_output) {
-  return grad_output.clone();
+  if (last_input_.size() == 0 || in_channels_ == 0) {
+    return grad_output.clone();
+  }
+
+  // 获取形状信息
+  size_t in_c = last_input_.shape()[0];
+  size_t in_h = last_input_.shape()[1];
+  size_t in_w = last_input_.shape()[2];
+
+  size_t out_c = grad_output.shape()[0];
+  size_t out_h = grad_output.shape()[1];
+  size_t out_w = grad_output.shape()[2];
+
+  // 初始化梯度
+  Tensor input_grad(last_input_.shape());
+  input_grad.zeros();
+  weight_grad_.zeros();
+  if (use_bias_) {
+    bias_grad_.zeros();
+  }
+
+  // 计算偏置梯度（简单求和）
+  if (use_bias_) {
+    for (size_t oc = 0; oc < out_c; oc++) {
+      float bias_grad_sum = 0.0f;
+      for (size_t oh = 0; oh < out_h; oh++) {
+        for (size_t ow = 0; ow < out_w; ow++) {
+          size_t out_idx = oc * out_h * out_w + oh * out_w + ow;
+          bias_grad_sum += grad_output[out_idx];
+        }
+      }
+      bias_grad_[oc] += bias_grad_sum;
+    }
+  }
+
+  // 计算权重梯度和输入梯度
+  for (size_t oc = 0; oc < out_c; oc++) {
+    for (size_t oh = 0; oh < out_h; oh++) {
+      for (size_t ow = 0; ow < out_w; ow++) {
+        size_t out_idx = oc * out_h * out_w + oh * out_w + ow;
+        float grad_val = grad_output[out_idx];
+
+        for (size_t ic = 0; ic < in_c; ic++) {
+          for (int kh = 0; kh < kernel_size_; kh++) {
+            for (int kw = 0; kw < kernel_size_; kw++) {
+              int ih = oh * stride_ - padding_ + kh;
+              int iw = ow * stride_ - padding_ + kw;
+
+              if (ih >= 0 && ih < (int)in_h && iw >= 0 && iw < (int)in_w) {
+                size_t input_idx = ic * in_h * in_w + ih * in_w + iw;
+                size_t weight_idx =
+                    oc * in_channels_ * kernel_size_ * kernel_size_ +
+                    ic * kernel_size_ * kernel_size_ + kh * kernel_size_ + kw;
+
+                // 权重梯度：∂L/∂W = input * grad_output
+                weight_grad_[weight_idx] += last_input_[input_idx] * grad_val;
+
+                // 输入梯度：∂L/∂input = weight * grad_output
+                input_grad[input_idx] += weights_[weight_idx] * grad_val;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  return input_grad;
 }
 
 std::vector<Tensor *> ConvLayer::parameters() {
@@ -88,27 +222,111 @@ FullyConnectedLayer::FullyConnectedLayer(int in_features, int out_features,
 void FullyConnectedLayer::initialize_parameters() {
   if (in_features_ > 0) {
     weights_ = Tensor({(size_t)in_features_, (size_t)out_features_});
+    // Xavier初始化
+    weights_.xavier_uniform(in_features_, out_features_);
+
     if (use_bias_) {
       bias_ = Tensor({(size_t)out_features_});
+      bias_.zeros();
     }
     weight_grad_ = Tensor(weights_.shape());
+    weight_grad_.zeros();
     if (use_bias_) {
       bias_grad_ = Tensor(bias_.shape());
+      bias_grad_.zeros();
     }
   }
 }
 
 Tensor FullyConnectedLayer::forward(const Tensor &input) {
   last_input_ = input;
+
+  // 如果还没有初始化参数，根据输入形状初始化
   if (in_features_ == 0) {
-    in_features_ = input.size() / input.shape()[0];
+    in_features_ = input.size();
     initialize_parameters();
   }
-  return input.clone(); // 简化实现
+
+  // 确保输入是1D的
+  Tensor flat_input = input;
+  if (input.ndim() > 1) {
+    // 展平输入
+    flat_input = Tensor({input.size()});
+    for (size_t i = 0; i < input.size(); i++) {
+      flat_input[i] = input[i];
+    }
+  }
+
+  // 矩阵乘法 + 偏置
+  Tensor output({(size_t)out_features_});
+  output.zeros();
+
+  for (int o = 0; o < out_features_; o++) {
+    float sum = 0.0f;
+    for (int i = 0; i < in_features_; i++) {
+      sum += flat_input[i] * weights_[i * out_features_ + o];
+    }
+    if (use_bias_) {
+      sum += bias_[o];
+    }
+    output[o] = sum;
+  }
+
+  return output;
 }
 
 Tensor FullyConnectedLayer::backward(const Tensor &grad_output) {
-  return grad_output.clone();
+  if (last_input_.size() == 0 || in_features_ == 0) {
+    return grad_output.clone();
+  }
+
+  // 确保输入是1D的
+  Tensor flat_input = last_input_;
+  if (last_input_.ndim() > 1) {
+    flat_input = Tensor({last_input_.size()});
+    for (size_t i = 0; i < last_input_.size(); i++) {
+      flat_input[i] = last_input_[i];
+    }
+  }
+
+  // 初始化梯度
+  Tensor input_grad({(size_t)in_features_});
+  input_grad.zeros();
+  weight_grad_.zeros();
+  if (use_bias_) {
+    bias_grad_.zeros();
+  }
+
+  // 计算偏置梯度：∂L/∂b = grad_output
+  if (use_bias_) {
+    for (int o = 0; o < out_features_; o++) {
+      bias_grad_[o] += grad_output[o];
+    }
+  }
+
+  // 计算权重梯度和输入梯度
+  for (int i = 0; i < in_features_; i++) {
+    for (int o = 0; o < out_features_; o++) {
+      size_t weight_idx = i * out_features_ + o;
+
+      // 权重梯度：∂L/∂W = input * grad_output
+      weight_grad_[weight_idx] += flat_input[i] * grad_output[o];
+
+      // 输入梯度：∂L/∂input = weight * grad_output
+      input_grad[i] += weights_[weight_idx] * grad_output[o];
+    }
+  }
+
+  // 如果原始输入是多维的，reshape回原始形状
+  if (last_input_.ndim() > 1) {
+    Tensor reshaped_grad(last_input_.shape());
+    for (size_t i = 0; i < last_input_.size(); i++) {
+      reshaped_grad.data()[i] = input_grad[i];
+    }
+    return reshaped_grad;
+  }
+
+  return input_grad;
 }
 
 std::vector<Tensor *> FullyConnectedLayer::parameters() {
@@ -150,7 +368,12 @@ Tensor ReLULayer::forward(const Tensor &input) {
 }
 
 Tensor ReLULayer::backward(const Tensor &grad_output) {
-  return grad_output.clone(); // 简化实现
+  // ReLU的导数：输入>0时为1，否则为0
+  Tensor grad_input(grad_output.shape());
+  for (size_t i = 0; i < grad_output.size(); i++) {
+    grad_input[i] = (last_input_[i] > 0) ? grad_output[i] : 0.0f;
+  }
+  return grad_input;
 }
 
 std::vector<int>
@@ -165,7 +388,13 @@ Tensor SigmoidLayer::forward(const Tensor &input) {
 }
 
 Tensor SigmoidLayer::backward(const Tensor &grad_output) {
-  return grad_output.clone(); // 简化实现
+  // Sigmoid的导数：σ(x) * (1 - σ(x))
+  Tensor grad_input(grad_output.shape());
+  for (size_t i = 0; i < grad_output.size(); i++) {
+    float sigmoid_val = last_output_[i];
+    grad_input[i] = grad_output[i] * sigmoid_val * (1.0f - sigmoid_val);
+  }
+  return grad_input;
 }
 
 std::vector<int>
@@ -180,7 +409,13 @@ Tensor TanhLayer::forward(const Tensor &input) {
 }
 
 Tensor TanhLayer::backward(const Tensor &grad_output) {
-  return grad_output.clone(); // 简化实现
+  // Tanh的导数：1 - tanh²(x)
+  Tensor grad_input(grad_output.shape());
+  for (size_t i = 0; i < grad_output.size(); i++) {
+    float tanh_val = last_output_[i];
+    grad_input[i] = grad_output[i] * (1.0f - tanh_val * tanh_val);
+  }
+  return grad_input;
 }
 
 std::vector<int>
@@ -194,7 +429,10 @@ Tensor SoftmaxLayer::forward(const Tensor &input) {
   return last_output_;
 }
 
-Tensor SoftmaxLayer::backward(const Tensor &grad_output) { return grad_output; }
+Tensor SoftmaxLayer::backward(const Tensor &grad_output) {
+  // 简化：对于交叉熵损失，softmax的梯度通常在损失函数中处理
+  return grad_output;
+}
 
 std::vector<int>
 SoftmaxLayer::output_shape(const std::vector<int> &input_shape) const {
@@ -208,11 +446,83 @@ MaxPoolLayer::MaxPoolLayer(int kernel_size, int stride, int padding)
 
 Tensor MaxPoolLayer::forward(const Tensor &input) {
   last_input_ = input;
-  return input.clone(); // 简化实现
+
+  if (input.ndim() != 3) {
+    throw std::runtime_error("MaxPoolLayer期望3D输入 (C, H, W)");
+  }
+
+  size_t in_c = input.shape()[0];
+  size_t in_h = input.shape()[1];
+  size_t in_w = input.shape()[2];
+
+  size_t out_h = (in_h + 2 * padding_ - kernel_size_) / stride_ + 1;
+  size_t out_w = (in_w + 2 * padding_ - kernel_size_) / stride_ + 1;
+
+  Tensor output({in_c, out_h, out_w});
+  output.zeros();
+
+  // 创建最大值索引张量来记录哪个位置被选中
+  max_indices_ = Tensor({in_c, out_h, out_w});
+  max_indices_.zeros();
+
+  // MaxPool计算
+  for (size_t c = 0; c < in_c; c++) {
+    for (size_t oh = 0; oh < out_h; oh++) {
+      for (size_t ow = 0; ow < out_w; ow++) {
+        float max_val = -std::numeric_limits<float>::max();
+        size_t max_idx = 0;
+
+        for (int kh = 0; kh < kernel_size_; kh++) {
+          for (int kw = 0; kw < kernel_size_; kw++) {
+            int ih = oh * stride_ - padding_ + kh;
+            int iw = ow * stride_ - padding_ + kw;
+
+            if (ih >= 0 && ih < (int)in_h && iw >= 0 && iw < (int)in_w) {
+              size_t input_idx = c * in_h * in_w + ih * in_w + iw;
+              if (input[input_idx] > max_val) {
+                max_val = input[input_idx];
+                max_idx = input_idx;
+              }
+            }
+          }
+        }
+
+        size_t output_idx = c * out_h * out_w + oh * out_w + ow;
+        output[output_idx] = max_val;
+        max_indices_[output_idx] = static_cast<float>(max_idx);
+      }
+    }
+  }
+
+  return output;
 }
 
 Tensor MaxPoolLayer::backward(const Tensor &grad_output) {
-  return grad_output.clone();
+  if (last_input_.size() == 0) {
+    return grad_output.clone();
+  }
+
+  Tensor input_grad(last_input_.shape());
+  input_grad.zeros();
+
+  size_t out_c = grad_output.shape()[0];
+  size_t out_h = grad_output.shape()[1];
+  size_t out_w = grad_output.shape()[2];
+
+  // 将梯度传播回最大值位置
+  for (size_t c = 0; c < out_c; c++) {
+    for (size_t oh = 0; oh < out_h; oh++) {
+      for (size_t ow = 0; ow < out_w; ow++) {
+        size_t output_idx = c * out_h * out_w + oh * out_w + ow;
+        size_t max_input_idx = static_cast<size_t>(max_indices_[output_idx]);
+
+        // 只有最大值位置才接收梯度
+        input_grad[max_input_idx] += grad_output[output_idx];
+      }
+    }
+  }
+
+  return input_grad;
 }
 
 std::vector<int>
@@ -259,14 +569,48 @@ AvgPoolLayer::output_shape(const std::vector<int> &input_shape) const {
 
 // DropoutLayer实现
 Tensor DropoutLayer::forward(const Tensor &input) {
+  last_input_ = input;
+
   if (!is_training()) {
+    // 推理模式：不进行dropout
     return input;
   }
-  return input.clone(); // 简化实现
+
+  // 训练模式：应用dropout
+  Tensor output(input.shape());
+  dropout_mask_ = Tensor(input.shape());
+
+  std::random_device rd;
+  std::mt19937 gen(rd());
+  std::uniform_real_distribution<float> dist(0.0f, 1.0f);
+
+  for (size_t i = 0; i < input.size(); ++i) {
+    if (dist(gen) > p_) {
+      // 保留神经元：缩放输出以保持期望值不变
+      output[i] = input[i] / (1.0f - p_);
+      dropout_mask_[i] = 1.0f / (1.0f - p_);
+    } else {
+      // 丢弃神经元
+      output[i] = 0.0f;
+      dropout_mask_[i] = 0.0f;
+    }
+  }
+
+  return output;
 }
 
 Tensor DropoutLayer::backward(const Tensor &grad_output) {
-  return grad_output.clone();
+  if (!is_training()) {
+    return grad_output.clone();
+  }
+
+  // 应用相同的mask
+  Tensor grad_input(grad_output.shape());
+  for (size_t i = 0; i < grad_output.size(); ++i) {
+    grad_input[i] = grad_output[i] * dropout_mask_[i];
+  }
+
+  return grad_input;
 }
 
 std::vector<int>
@@ -287,15 +631,109 @@ void BatchNormLayer::initialize_parameters() {
   running_var_ = Tensor({(size_t)num_features_});
   gamma_grad_ = Tensor(gamma_.shape());
   beta_grad_ = Tensor(beta_.shape());
+
+  // 初始化gamma为1，beta为0
+  for (int i = 0; i < num_features_; ++i) {
+    gamma_[i] = 1.0f;
+    beta_[i] = 0.0f;
+    running_mean_[i] = 0.0f;
+    running_var_[i] = 1.0f;
+  }
+  gamma_grad_.zeros();
+  beta_grad_.zeros();
 }
 
 Tensor BatchNormLayer::forward(const Tensor &input) {
   last_input_ = input;
-  return input.clone(); // 简化实现
+
+  // 支持1D输入（全连接层后）和3D输入（卷积层后）
+  if (input.ndim() == 1) {
+    // 1D情况：直接处理特征
+    if (input.size() != static_cast<size_t>(num_features_)) {
+      throw std::runtime_error("BatchNorm输入特征数与期望不匹配");
+    }
+
+    Tensor output(input.shape());
+
+    if (is_training()) {
+      // 训练模式：计算当前批次的均值和方差
+      float mean = 0.0f;
+      for (size_t i = 0; i < input.size(); ++i) {
+        mean += input[i];
+      }
+      mean /= input.size();
+
+      float var = 0.0f;
+      for (size_t i = 0; i < input.size(); ++i) {
+        float diff = input[i] - mean;
+        var += diff * diff;
+      }
+      var /= input.size();
+
+      // 更新运行统计
+      for (int i = 0; i < num_features_; ++i) {
+        running_mean_[i] =
+            momentum_ * running_mean_[i] + (1.0f - momentum_) * mean;
+        running_var_[i] =
+            momentum_ * running_var_[i] + (1.0f - momentum_) * var;
+      }
+
+      // 标准化和缩放
+      float std_dev = std::sqrt(var + eps_);
+      for (size_t i = 0; i < input.size(); ++i) {
+        float normalized = (input[i] - mean) / std_dev;
+        output[i] = gamma_[i] * normalized + beta_[i];
+      }
+
+      // 保存中间值用于反向传播
+      batch_mean_ = mean;
+      batch_var_ = var;
+
+    } else {
+      // 推理模式：使用运行统计
+      for (size_t i = 0; i < input.size(); ++i) {
+        float std_dev = std::sqrt(running_var_[i] + eps_);
+        float normalized = (input[i] - running_mean_[i]) / std_dev;
+        output[i] = gamma_[i] * normalized + beta_[i];
+      }
+    }
+
+    return output;
+  } else {
+    // 对于3D或更高维度，简化处理
+    return input.clone();
+  }
 }
 
 Tensor BatchNormLayer::backward(const Tensor &grad_output) {
-  return grad_output.clone();
+  if (last_input_.size() == 0) {
+    return grad_output.clone();
+  }
+
+  Tensor input_grad(last_input_.shape());
+  input_grad.zeros();
+  gamma_grad_.zeros();
+  beta_grad_.zeros();
+
+  if (last_input_.ndim() == 1) {
+    float N = static_cast<float>(last_input_.size());
+    float std_dev = std::sqrt(batch_var_ + eps_);
+
+    // 计算梯度
+    for (size_t i = 0; i < last_input_.size(); ++i) {
+      // beta梯度
+      beta_grad_[i] += grad_output[i];
+
+      // gamma梯度
+      float normalized = (last_input_[i] - batch_mean_) / std_dev;
+      gamma_grad_[i] += grad_output[i] * normalized;
+
+      // 输入梯度（简化版本）
+      input_grad[i] = gamma_[i] * grad_output[i] / std_dev;
+    }
+  }
+
+  return input_grad;
 }
 
 std::vector<Tensor *> BatchNormLayer::parameters() { return {&gamma_, &beta_}; }

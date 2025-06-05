@@ -79,18 +79,42 @@ float CrossEntropyLoss::forward(const Tensor &predictions,
   const auto &pred_shape = predictions.shape();
   const auto &target_shape = targets.shape();
 
-  if (pred_shape.size() != 2) {
-    throw std::invalid_argument("预测张量必须是2D [batch_size, num_classes]");
-  }
+  // 支持1D输入（单个样本）和2D输入（批次）
+  int batch_size = 1;
+  int num_classes = 0;
 
-  int batch_size = pred_shape[0];
-  int num_classes = pred_shape[1];
+  if (pred_shape.size() == 1) {
+    // 1D输入：单个样本
+    num_classes = pred_shape[0];
+  } else if (pred_shape.size() == 2) {
+    // 2D输入：批次
+    batch_size = pred_shape[0];
+    num_classes = pred_shape[1];
+  } else {
+    throw std::invalid_argument(
+        "预测张量必须是1D [num_classes] 或 2D [batch_size, num_classes]");
+  }
 
   float loss = 0.0f;
 
-  // 简化实现：假设targets是类别索引
   for (int i = 0; i < batch_size; ++i) {
-    int target_class = static_cast<int>(targets[i]);
+    // 获取目标类别
+    int target_class;
+    if (target_shape.size() == 1 && target_shape[0] == num_classes) {
+      // one-hot编码
+      target_class = 0;
+      float max_val = targets[0];
+      for (int j = 1; j < num_classes; ++j) {
+        if (targets[j] > max_val) {
+          max_val = targets[j];
+          target_class = j;
+        }
+      }
+    } else {
+      // 类别索引
+      target_class = static_cast<int>(targets[i]);
+    }
+
     if (target_class < 0 || target_class >= num_classes) {
       throw std::out_of_range("目标类别索引超出范围");
     }
@@ -130,20 +154,44 @@ float CrossEntropyLoss::forward(const Tensor &predictions,
 Tensor CrossEntropyLoss::backward(const Tensor &predictions,
                                   const Tensor &targets) {
   const auto &pred_shape = predictions.shape();
+  const auto &target_shape = targets.shape();
 
-  if (pred_shape.size() != 2) {
-    throw std::invalid_argument("预测张量必须是2D [batch_size, num_classes]");
+  // 支持1D输入（单个样本）和2D输入（批次）
+  int batch_size = 1;
+  int num_classes = 0;
+
+  if (pred_shape.size() == 1) {
+    // 1D输入：单个样本
+    num_classes = pred_shape[0];
+  } else if (pred_shape.size() == 2) {
+    // 2D输入：批次
+    batch_size = pred_shape[0];
+    num_classes = pred_shape[1];
+  } else {
+    throw std::invalid_argument(
+        "预测张量必须是1D [num_classes] 或 2D [batch_size, num_classes]");
   }
-
-  int batch_size = pred_shape[0];
-  int num_classes = pred_shape[1];
 
   Tensor grad(pred_shape);
   grad.zeros();
 
-  // 简化实现
   for (int i = 0; i < batch_size; ++i) {
-    int target_class = static_cast<int>(targets[i]);
+    // 获取目标类别
+    int target_class;
+    if (target_shape.size() == 1 && target_shape[0] == num_classes) {
+      // one-hot编码
+      target_class = 0;
+      float max_val = targets[0];
+      for (int j = 1; j < num_classes; ++j) {
+        if (targets[j] > max_val) {
+          max_val = targets[j];
+          target_class = j;
+        }
+      }
+    } else {
+      // 类别索引
+      target_class = static_cast<int>(targets[i]);
+    }
 
     if (from_logits_) {
       // 计算softmax

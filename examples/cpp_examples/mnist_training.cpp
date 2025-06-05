@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <chrono>
 #include <cmath>
+#include <filesystem>
 #include <fstream>
 #include <iostream>
 #include <random>
@@ -12,6 +13,42 @@
 #include "cnn/optimizer.h"
 #include "cnn/tensor.h"
 #include "cnn/utils.h"
+
+// 智能获取项目数据目录路径
+std::string get_project_data_path() {
+  // 1. 首先尝试从环境变量获取项目根目录
+  const char *project_root = std::getenv("CNN_DEMO_ROOT");
+  if (project_root) {
+    std::string data_path = std::string(project_root) + "/data";
+    if (std::filesystem::exists(data_path)) {
+      std::cout << "使用环境变量CNN_DEMO_ROOT指定的数据路径: " << data_path
+                << std::endl;
+      return data_path;
+    }
+  }
+
+  // 2. 尝试相对于当前工作目录的常见路径
+  std::vector<std::string> possible_paths = {
+      "./data",          // 从项目根目录运行
+      "../data",         // 从build目录运行
+      "../../data",      // 从build/bin目录运行
+      "../../../data",   // 从build/Debug/bin等深层目录运行
+      "./CNN_demo/data", // 从上级目录运行
+      "../CNN_demo/data" // 从兄弟目录运行
+  };
+
+  for (const auto &path : possible_paths) {
+    if (std::filesystem::exists(path)) {
+      std::cout << "找到数据目录: " << std::filesystem::absolute(path)
+                << std::endl;
+      return path;
+    }
+  }
+
+  // 3. 如果都找不到，返回默认路径（会触发生成随机数据）
+  std::cout << "未找到数据目录，将使用随机数据进行演示" << std::endl;
+  return "./data"; // 默认路径，即使不存在也没关系，load_mnist_sample会处理
+}
 
 // 简单的MNIST数据加载函数（部分数据用于演示）
 bool load_mnist_sample(std::vector<CNN::Tensor> &images,
@@ -185,70 +222,76 @@ int main() {
   std::vector<CNN::Tensor> test_images;
   std::vector<int> test_labels;
 
-  // 数据文件路径
-  std::string train_images_file = "data/train-images.idx3-ubyte";
-  std::string train_labels_file = "data/train-labels.idx1-ubyte";
-  std::string test_images_file = "data/t10k-images.idx3-ubyte";
-  std::string test_labels_file = "data/t10k-labels.idx1-ubyte";
+  // 智能获取数据文件路径
+  std::string data_dir = get_project_data_path();
+  std::string train_images_file = data_dir + "/train-images.idx3-ubyte";
+  std::string train_labels_file = data_dir + "/train-labels.idx1-ubyte";
+  std::string test_images_file = data_dir + "/t10k-images.idx3-ubyte";
+  std::string test_labels_file = data_dir + "/t10k-labels.idx1-ubyte";
 
   // 加载训练数据和测试数据（如果不存在，将生成随机数据）
   load_mnist_sample(train_images, train_labels, train_images_file,
-                    train_labels_file, 5000);
+                    train_labels_file, 8000); // 增加训练样本到8000
   load_mnist_sample(test_images, test_labels, test_images_file,
-                    test_labels_file, 1000);
+                    test_labels_file, 2000); // 增加测试样本到2000
 
   // 创建CNN网络
   CNN::Network network;
 
-  // 构建简化的网络架构（使用便捷方法）
-  network.add_conv_layer(6, 5, 1, 2); // 输出: 6@28x28
+  // 构建最优的网络架构
+  network.add_conv_layer(8, 5, 1, 2); // 第一层：1→8通道
   network.add_relu_layer();
-  network.add_maxpool_layer(2, 2);     // 输出: 6@14x14
-  network.add_conv_layer(16, 5, 1, 0); // 输出: 16@10x10
+  network.add_maxpool_layer(2, 2);     // 28x28 → 14x14
+  network.add_conv_layer(16, 5, 1, 0); // 第二层：8→16通道
   network.add_relu_layer();
-  network.add_maxpool_layer(2, 2); // 输出: 16@5x5
-  network.add_flatten_layer();     // 输出: 400
-  network.add_fc_layer(120);
+  network.add_maxpool_layer(2, 2); // 14x14 → 7x7
+  network.add_flatten_layer();     // 展平
+  network.add_fc_layer(128);       // 第一个全连接层
   network.add_relu_layer();
-  network.add_fc_layer(84);
+  network.add_dropout_layer(0.4f); // 增加Dropout到40%
+  network.add_fc_layer(64);        // 第二个全连接层
   network.add_relu_layer();
-  network.add_fc_layer(10);
-  network.add_softmax_layer();
+  network.add_dropout_layer(0.3f); // Dropout 30%
+  network.add_fc_layer(10);        // 输出层10个类别
 
   // 设置优化器和损失函数
-  network.set_optimizer(std::make_unique<CNN::AdamOptimizer>(0.001f));
-  network.set_loss_function(std::make_unique<CNN::CrossEntropyLoss>());
+  network.set_optimizer(
+      std::make_unique<CNN::SGDOptimizer>(0.02f)); // 稍微降低学习率
+  network.set_loss_function(
+      std::make_unique<CNN::CrossEntropyLoss>(true)); // from_logits=true
 
-  // 简化版本的训练过程
-  std::cout << "\n开始简化训练演示...\n";
+  // 转换标签为one-hot编码
+  std::vector<CNN::Tensor> train_one_hot_labels;
+  std::vector<CNN::Tensor> test_one_hot_labels;
 
-  // 只训练几个样本作为演示
-  for (int epoch = 1; epoch <= 3; ++epoch) {
-    std::cout << "轮次 " << epoch << "/3 - 演示前向传播..." << std::endl;
-
-    // 随机选择几个样本进行前向传播演示
-    for (int i = 0; i < 5 && i < train_images.size(); ++i) {
-      CNN::Tensor output = network.forward(train_images[i]);
-
-      // 显示预测结果
-      int predicted = 0;
-      float max_val = output.data()[0];
-      for (int j = 1; j < 10; ++j) {
-        if (output.data()[j] > max_val) {
-          max_val = output.data()[j];
-          predicted = j;
-        }
-      }
-
-      std::cout << "样本 " << i + 1 << ": 真实标签=" << train_labels[i]
-                << ", 预测=" << predicted << std::endl;
-    }
+  for (int label : train_labels) {
+    train_one_hot_labels.push_back(to_one_hot(label));
   }
+  for (int label : test_labels) {
+    test_one_hot_labels.push_back(to_one_hot(label));
+  }
+
+  std::cout << "网络参数数量: " << network.get_num_parameters() << std::endl;
+
+  // 触发参数初始化：进行一次前向传播
+  if (!train_images.empty()) {
+    std::cout << "触发参数初始化..." << std::endl;
+    CNN::Tensor dummy_output = network.forward(train_images[0]);
+    std::cout << "初始化后网络参数数量: " << network.get_num_parameters()
+              << std::endl;
+  }
+
+  // 开始训练
+  std::cout << "\n开始训练...\n";
+
+  // 使用Network类的train方法进行训练，最终调优参数
+  network.train(train_images, train_one_hot_labels, 20, 32,
+                0.02f); // 增加到20轮
 
   // 评估模型
   std::cout << "\n在测试集上评估模型...\n";
   evaluate_model(network, test_images, test_labels);
 
-  std::cout << "\n演示完成!\n";
+  std::cout << "\n训练完成!\n";
   return 0;
 }

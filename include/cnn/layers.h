@@ -229,6 +229,7 @@ public:
 private:
   float p_;
   Tensor dropout_mask_;
+  Tensor last_input_;
 };
 
 // 批标准化层
@@ -264,6 +265,10 @@ private:
   Tensor last_input_;
   Tensor normalized_;
   Tensor std_;
+
+  // 批次统计（用于反向传播）
+  float batch_mean_;
+  float batch_var_;
 
   void initialize_parameters();
 };
