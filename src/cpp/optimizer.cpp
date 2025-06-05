@@ -23,11 +23,36 @@ SGDOptimizer::SGDOptimizer(float learning_rate, float momentum,
 
 void SGDOptimizer::step(const std::vector<Tensor *> &parameters,
                         const std::vector<Tensor *> &gradients) {
-  // 简化实现
-  for (size_t i = 0; i < parameters.size() && i < gradients.size(); ++i) {
+  if (parameters.size() != gradients.size()) {
+    throw std::runtime_error("参数和梯度数量不匹配");
+  }
+
+  for (size_t i = 0; i < parameters.size(); ++i) {
     if (parameters[i] && gradients[i]) {
-      // 基础SGD: param = param - learning_rate * grad
-      // 这里需要实现真正的参数更新逻辑
+      Tensor *param = parameters[i];
+      const Tensor *grad = gradients[i];
+
+      if (momentum_ > 0.0f) {
+        // 检查是否需要初始化速度缓冲区
+        auto it = velocity_buffers_.find(param);
+        if (it == velocity_buffers_.end()) {
+          velocity_buffers_[param] = Tensor(param->shape());
+          velocity_buffers_[param].zeros();
+        }
+
+        // 动量SGD: v = momentum * v + grad, param = param - lr * v
+        Tensor &velocity = velocity_buffers_[param];
+
+        for (size_t j = 0; j < param->size(); ++j) {
+          velocity[j] = momentum_ * velocity[j] + (*grad)[j];
+          (*param)[j] -= learning_rate_ * velocity[j];
+        }
+      } else {
+        // 基础SGD: param = param - learning_rate * grad
+        for (size_t j = 0; j < param->size(); ++j) {
+          (*param)[j] -= learning_rate_ * (*grad)[j];
+        }
+      }
     }
   }
 }

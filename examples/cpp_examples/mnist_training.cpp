@@ -185,70 +185,73 @@ int main() {
   std::vector<CNN::Tensor> test_images;
   std::vector<int> test_labels;
 
-  // 数据文件路径
-  std::string train_images_file = "data/train-images.idx3-ubyte";
-  std::string train_labels_file = "data/train-labels.idx1-ubyte";
-  std::string test_images_file = "data/t10k-images.idx3-ubyte";
-  std::string test_labels_file = "data/t10k-labels.idx1-ubyte";
+  // 数据文件路径 - 从build/bin目录访问data目录
+  std::string train_images_file = "../../data/train-images.idx3-ubyte";
+  std::string train_labels_file = "../../data/train-labels.idx1-ubyte";
+  std::string test_images_file = "../../data/t10k-images.idx3-ubyte";
+  std::string test_labels_file = "../../data/t10k-labels.idx1-ubyte";
 
   // 加载训练数据和测试数据（如果不存在，将生成随机数据）
   load_mnist_sample(train_images, train_labels, train_images_file,
-                    train_labels_file, 5000);
+                    train_labels_file, 5000); // 增加训练样本到5000
   load_mnist_sample(test_images, test_labels, test_images_file,
-                    test_labels_file, 1000);
+                    test_labels_file, 1000); // 增加测试样本到1000
 
   // 创建CNN网络
   CNN::Network network;
 
-  // 构建简化的网络架构（使用便捷方法）
-  network.add_conv_layer(6, 5, 1, 2); // 输出: 6@28x28
+  // 构建改进的网络架构
+  network.add_conv_layer(8, 5, 1, 2); // 第一层：1→8通道，增加特征图数量
   network.add_relu_layer();
-  network.add_maxpool_layer(2, 2);     // 输出: 6@14x14
-  network.add_conv_layer(16, 5, 1, 0); // 输出: 16@10x10
+  network.add_maxpool_layer(2, 2);     // 2x2最大池化
+  network.add_conv_layer(16, 5, 1, 0); // 第二层：8→16通道
   network.add_relu_layer();
-  network.add_maxpool_layer(2, 2); // 输出: 16@5x5
-  network.add_flatten_layer();     // 输出: 400
-  network.add_fc_layer(120);
+  network.add_maxpool_layer(2, 2); // 2x2最大池化
+  network.add_flatten_layer();     // 展平
+  network.add_fc_layer(128);       // 增加第一个全连接层到128
   network.add_relu_layer();
-  network.add_fc_layer(84);
+  network.add_fc_layer(64); // 第二个全连接层64
   network.add_relu_layer();
-  network.add_fc_layer(10);
-  network.add_softmax_layer();
+  network.add_fc_layer(10); // 输出层10个类别
 
   // 设置优化器和损失函数
-  network.set_optimizer(std::make_unique<CNN::AdamOptimizer>(0.001f));
-  network.set_loss_function(std::make_unique<CNN::CrossEntropyLoss>());
+  network.set_optimizer(
+      std::make_unique<CNN::SGDOptimizer>(0.02f)); // 降低学习率到0.02
+  network.set_loss_function(
+      std::make_unique<CNN::CrossEntropyLoss>(true)); // from_logits=true
 
-  // 简化版本的训练过程
-  std::cout << "\n开始简化训练演示...\n";
+  // 转换标签为one-hot编码
+  std::vector<CNN::Tensor> train_one_hot_labels;
+  std::vector<CNN::Tensor> test_one_hot_labels;
 
-  // 只训练几个样本作为演示
-  for (int epoch = 1; epoch <= 3; ++epoch) {
-    std::cout << "轮次 " << epoch << "/3 - 演示前向传播..." << std::endl;
-
-    // 随机选择几个样本进行前向传播演示
-    for (int i = 0; i < 5 && i < train_images.size(); ++i) {
-      CNN::Tensor output = network.forward(train_images[i]);
-
-      // 显示预测结果
-      int predicted = 0;
-      float max_val = output.data()[0];
-      for (int j = 1; j < 10; ++j) {
-        if (output.data()[j] > max_val) {
-          max_val = output.data()[j];
-          predicted = j;
-        }
-      }
-
-      std::cout << "样本 " << i + 1 << ": 真实标签=" << train_labels[i]
-                << ", 预测=" << predicted << std::endl;
-    }
+  for (int label : train_labels) {
+    train_one_hot_labels.push_back(to_one_hot(label));
   }
+  for (int label : test_labels) {
+    test_one_hot_labels.push_back(to_one_hot(label));
+  }
+
+  std::cout << "网络参数数量: " << network.get_num_parameters() << std::endl;
+
+  // 触发参数初始化：进行一次前向传播
+  if (!train_images.empty()) {
+    std::cout << "触发参数初始化..." << std::endl;
+    CNN::Tensor dummy_output = network.forward(train_images[0]);
+    std::cout << "初始化后网络参数数量: " << network.get_num_parameters()
+              << std::endl;
+  }
+
+  // 开始训练
+  std::cout << "\n开始训练...\n";
+
+  // 使用Network类的train方法进行训练
+  network.train(train_images, train_one_hot_labels, 12, 32,
+                0.02f); // 增加到12轮，学习率0.02
 
   // 评估模型
   std::cout << "\n在测试集上评估模型...\n";
   evaluate_model(network, test_images, test_labels);
 
-  std::cout << "\n演示完成!\n";
+  std::cout << "\n训练完成!\n";
   return 0;
 }
