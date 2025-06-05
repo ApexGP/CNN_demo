@@ -1,9 +1,18 @@
 # 编译产物
 build/
 
+# 输出文件
+*.bin
+
 # 数据集
 data/MNIST/
 data/t*
+
+# 图片生成
+img/
+
+# 报告
+REPORT.md
 
 # IDE 配置
 .vscode/
