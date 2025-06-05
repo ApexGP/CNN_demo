@@ -3,7 +3,7 @@
 [![Language](https://img.shields.io/badge/language-C%2B%2B-orange.svg)](https://isocpp.org/)
 [![Language](https://img.shields.io/badge/language-python-blue.svg)](https://isocpp.org/)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Build Status](https://img.shields.io/badge/Build-Passing-brightgreen.svg)](#)
+[![Build Status](https://img.shields.io/badge/Build-Passing-brightgreen.svg)](https://github.com/ApexGP/CNN_demo)
 
 一个**高性能**的卷积神经网络框架，从零实现完整的深度学习流水线。结合 C/C++核心计算与 Python 易用接口，在 MNIST 数据集上达到**90.9%准确率**。
 
@@ -18,11 +18,16 @@
 ### 💻 技术架构亮点
 
 ```
-✅ 完整反向传播算法      ✅ Xavier 参数初始化
-✅ 卷积层梯度计算        ✅ Dropout 正则化技术
-✅ MaxPool 层实现       ✅ 多层网络架构
-✅ 交叉熵损失函数        ✅ SGD 优化器
-✅ 真实 MNIST 数据集    ✅ OpenMP 多线程加速
+✅ 完整反向传播算法
+✅ 卷积层梯度计算
+✅ MaxPool 层实现
+✅ 交叉熵损失函数
+✅ 真实 MNIST 数据集
+✅ Xavier 参数初始化
+✅ Dropout 正则化技术
+✅ 多层网络架构
+✅ SGD 优化器
+✅ OpenMP 多线程加速
 ```
 
 ## 🚀 快速体验
@@ -230,19 +235,19 @@ python scripts/check_dependencies.py
 
 ```
 CNN_demo/
-├── src/                    # 核心源代码
-│   ├── core_c/            # C核心计算库
-│   ├── cpp/               # C++面向对象封装
-│   └── python/            # Python绑定
-├── include/               # 头文件接口
-├── examples/              # 示例代码
+├── src/                        # 核心源代码
+│   ├── core_c/                 # C核心计算库
+│   ├── cpp/                    # C++面向对象封装
+│   └── python/                 # Python绑定
+├── include/                    # 头文件接口
+├── examples/                   # 示例代码
 │   └── cpp_examples/
 │       └── mnist_training.cpp  # 90.9%准确率演示
-├── tests/                 # 单元测试
-├── docs/                  # 详细文档
-├── build.bat             # Windows构建脚本
-├── build.sh              # Linux构建脚本
-└── CMakeLists.txt        # CMake构建配置
+├── tests/                      # 单元测试
+├── docs/                       # 详细文档
+├── build.bat                   # Windows构建脚本
+├── build.sh                    # Linux构建脚本
+└── CMakeLists.txt              # CMake构建配置
 ```
 
 ## 🧪 运行测试
