@@ -14,6 +14,19 @@ foreach(SOURCE_FILE ${EXAMPLE_SOURCES})
     # 链接库
     target_link_libraries(${EXAMPLE_NAME} PRIVATE cnn cnn_core)
     
+    # 为需要filesystem的示例添加filesystem库支持
+    if("${EXAMPLE_NAME}" STREQUAL "mnist_training")
+        # 对于GCC 8及以下版本，需要显式链接stdc++fs
+        if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS "9.0")
+            target_link_libraries(${EXAMPLE_NAME} PRIVATE stdc++fs)
+        endif()
+        
+        # 对于Clang某些版本也需要
+        if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang" AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS "9.0")
+            target_link_libraries(${EXAMPLE_NAME} PRIVATE c++fs)
+        endif()
+    endif()
+    
     # 如果启用了OpenMP
     if(OpenMP_FOUND)
         target_link_libraries(${EXAMPLE_NAME} PRIVATE OpenMP::OpenMP_CXX)

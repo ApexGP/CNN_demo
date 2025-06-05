@@ -1,6 +1,8 @@
 #include "cnn/layers.h"
 #include <algorithm>
+#include <cmath>
 #include <limits>
+#include <random>
 #include <stdexcept>
 
 namespace CNN {
@@ -567,14 +569,48 @@ AvgPoolLayer::output_shape(const std::vector<int> &input_shape) const {
 
 // DropoutLayer实现
 Tensor DropoutLayer::forward(const Tensor &input) {
+  last_input_ = input;
+
   if (!is_training()) {
+    // 推理模式：不进行dropout
     return input;
   }
-  return input.clone(); // 简化实现
+
+  // 训练模式：应用dropout
+  Tensor output(input.shape());
+  dropout_mask_ = Tensor(input.shape());
+
+  std::random_device rd;
+  std::mt19937 gen(rd());
+  std::uniform_real_distribution<float> dist(0.0f, 1.0f);
+
+  for (size_t i = 0; i < input.size(); ++i) {
+    if (dist(gen) > p_) {
+      // 保留神经元：缩放输出以保持期望值不变
+      output[i] = input[i] / (1.0f - p_);
+      dropout_mask_[i] = 1.0f / (1.0f - p_);
+    } else {
+      // 丢弃神经元
+      output[i] = 0.0f;
+      dropout_mask_[i] = 0.0f;
+    }
+  }
+
+  return output;
 }
 
 Tensor DropoutLayer::backward(const Tensor &grad_output) {
-  return grad_output.clone();
+  if (!is_training()) {
+    return grad_output.clone();
+  }
+
+  // 应用相同的mask
+  Tensor grad_input(grad_output.shape());
+  for (size_t i = 0; i < grad_output.size(); ++i) {
+    grad_input[i] = grad_output[i] * dropout_mask_[i];
+  }
+
+  return grad_input;
 }
 
 std::vector<int>
@@ -595,15 +631,109 @@ void BatchNormLayer::initialize_parameters() {
   running_var_ = Tensor({(size_t)num_features_});
   gamma_grad_ = Tensor(gamma_.shape());
   beta_grad_ = Tensor(beta_.shape());
+
+  // 初始化gamma为1，beta为0
+  for (int i = 0; i < num_features_; ++i) {
+    gamma_[i] = 1.0f;
+    beta_[i] = 0.0f;
+    running_mean_[i] = 0.0f;
+    running_var_[i] = 1.0f;
+  }
+  gamma_grad_.zeros();
+  beta_grad_.zeros();
 }
 
 Tensor BatchNormLayer::forward(const Tensor &input) {
   last_input_ = input;
-  return input.clone(); // 简化实现
+
+  // 支持1D输入（全连接层后）和3D输入（卷积层后）
+  if (input.ndim() == 1) {
+    // 1D情况：直接处理特征
+    if (input.size() != static_cast<size_t>(num_features_)) {
+      throw std::runtime_error("BatchNorm输入特征数与期望不匹配");
+    }
+
+    Tensor output(input.shape());
+
+    if (is_training()) {
+      // 训练模式：计算当前批次的均值和方差
+      float mean = 0.0f;
+      for (size_t i = 0; i < input.size(); ++i) {
+        mean += input[i];
+      }
+      mean /= input.size();
+
+      float var = 0.0f;
+      for (size_t i = 0; i < input.size(); ++i) {
+        float diff = input[i] - mean;
+        var += diff * diff;
+      }
+      var /= input.size();
+
+      // 更新运行统计
+      for (int i = 0; i < num_features_; ++i) {
+        running_mean_[i] =
+            momentum_ * running_mean_[i] + (1.0f - momentum_) * mean;
+        running_var_[i] =
+            momentum_ * running_var_[i] + (1.0f - momentum_) * var;
+      }
+
+      // 标准化和缩放
+      float std_dev = std::sqrt(var + eps_);
+      for (size_t i = 0; i < input.size(); ++i) {
+        float normalized = (input[i] - mean) / std_dev;
+        output[i] = gamma_[i] * normalized + beta_[i];
+      }
+
+      // 保存中间值用于反向传播
+      batch_mean_ = mean;
+      batch_var_ = var;
+
+    } else {
+      // 推理模式：使用运行统计
+      for (size_t i = 0; i < input.size(); ++i) {
+        float std_dev = std::sqrt(running_var_[i] + eps_);
+        float normalized = (input[i] - running_mean_[i]) / std_dev;
+        output[i] = gamma_[i] * normalized + beta_[i];
+      }
+    }
+
+    return output;
+  } else {
+    // 对于3D或更高维度，简化处理
+    return input.clone();
+  }
 }
 
 Tensor BatchNormLayer::backward(const Tensor &grad_output) {
-  return grad_output.clone();
+  if (last_input_.size() == 0) {
+    return grad_output.clone();
+  }
+
+  Tensor input_grad(last_input_.shape());
+  input_grad.zeros();
+  gamma_grad_.zeros();
+  beta_grad_.zeros();
+
+  if (last_input_.ndim() == 1) {
+    float N = static_cast<float>(last_input_.size());
+    float std_dev = std::sqrt(batch_var_ + eps_);
+
+    // 计算梯度
+    for (size_t i = 0; i < last_input_.size(); ++i) {
+      // beta梯度
+      beta_grad_[i] += grad_output[i];
+
+      // gamma梯度
+      float normalized = (last_input_[i] - batch_mean_) / std_dev;
+      gamma_grad_[i] += grad_output[i] * normalized;
+
+      // 输入梯度（简化版本）
+      input_grad[i] = gamma_[i] * grad_output[i] / std_dev;
+    }
+  }
+
+  return input_grad;
 }
 
 std::vector<Tensor *> BatchNormLayer::parameters() { return {&gamma_, &beta_}; }

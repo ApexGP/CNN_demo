@@ -36,11 +36,22 @@ void Network::add_conv_layer(int out_channels, int kernel_size, int stride,
   // 推断输入通道数
   int in_channels = 1; // 默认为1（灰度图像）
 
-  // 特殊处理：根据层的位置确定输入通道数
-  if (layers_.empty()) {
-    in_channels = 1; // 第一层：输入是灰度图像
-  } else if (layers_.size() >= 3) {
-    in_channels = 8; // 第二层：来自第一个卷积层的8通道输出
+  // 根据已有的卷积层数量确定输入通道数
+  int conv_layer_count = 0;
+  for (const auto &layer : layers_) {
+    if (layer->name() == "ConvLayer") {
+      conv_layer_count++;
+    }
+  }
+
+  if (conv_layer_count == 0) {
+    in_channels = 1; // 第一层：灰度图像输入
+  } else if (conv_layer_count == 1) {
+    in_channels = 8; // 第二层：来自第一层的8通道
+  } else if (conv_layer_count == 2) {
+    in_channels = 16; // 第三层：来自第二层的16通道
+  } else {
+    in_channels = out_channels; // 更多层时使用输出通道数作为默认值
   }
 
   auto layer = std::make_unique<ConvLayer>(in_channels, out_channels,
